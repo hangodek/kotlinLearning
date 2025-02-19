@@ -55,18 +55,8 @@ fun LemonadeApp() {
 fun LemonadeWithButtonAndImage(modifier: Modifier = Modifier
     .fillMaxSize()) {
 
-    var clickCount by remember { mutableStateOf(0) }
-
-    val phase2 = (clickCount + 2..3).random()
-    val phase3 = (clickCount + 2..3).random()
-    val phase4 = (clickCount + 2..3).random()
-
-    val imageResource = when (clickCount) {
-        0 -> R.drawable.lemon_tree
-        phase2 -> R.drawable.lemon_squeeze
-        phase3 -> R.drawable.lemon_drink
-        phase4 -> R.drawable.lemon_restart
-    }
+    var currentStep by remember { mutableStateOf(1) }
+    var squeezeCount by remember { mutableStateOf(0) }
 
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -80,17 +70,70 @@ fun LemonadeWithButtonAndImage(modifier: Modifier = Modifier
                 .wrapContentSize(Alignment.Center)
         )
         Spacer(modifier = Modifier.height(250.dp))
-        Image(
-            painter = painterResource(imageResource),
-            contentDescription = null,
-            modifier = Modifier
-                .background(color = Color(0xffc3ecd2), shape = RoundedCornerShape(48.dp))
-                .padding(48.dp, 24.dp)
-                .clickable()
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.phase1_content)
-        )
+        when (currentStep) {
+            1 -> {
+                LemonadeStep(
+                    drawableResourceId = R.drawable.lemon_tree,
+                    labelResourceId = R.string.phase1_description,
+                    textLabelResourceId = R.string.phase1_content,
+                    onImageClick = {
+                        currentStep = 2
+                        squeezeCount = (2..4).random()
+                    }
+                )
+            }
+            2 -> {
+                LemonadeStep(
+                    drawableResourceId = R.drawable.lemon_squeeze,
+                    labelResourceId = R.string.phase2_description,
+                    textLabelResourceId = R.string.phase2_content,
+                    onImageClick = {
+                        squeezeCount--
+                        if (squeezeCount == 0) {
+                            currentStep = 3
+                        }
+                    }
+                )
+            }
+            3 -> {
+                LemonadeStep(
+                    drawableResourceId = R.drawable.lemon_drink,
+                    labelResourceId = R.string.phase3_description,
+                    textLabelResourceId = R.string.phase3_content,
+                    onImageClick = {
+                        currentStep = 4
+                    }
+                )
+            }
+            4 -> {
+                LemonadeStep(
+                    drawableResourceId = R.drawable.lemon_restart,
+                    labelResourceId = R.string.phase4_description,
+                    textLabelResourceId = R.string.phase4_content,
+                    onImageClick = {
+                        currentStep = 1
+                    }
+                )
+            }
+        }
+
     }
+}
+
+@Composable
+fun LemonadeStep(drawableResourceId: Int, labelResourceId: Int, textLabelResourceId: Int, onImageClick: () -> Unit, modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(drawableResourceId),
+        contentDescription = stringResource(labelResourceId),
+        modifier = Modifier
+            .background(color = Color(0xffc3ecd2), shape = RoundedCornerShape(48.dp))
+            .padding(48.dp, 24.dp)
+            .clickable {
+                onImageClick()
+            }
+    )
+    Spacer(modifier = Modifier.height(24.dp))
+    Text(
+        text = stringResource(textLabelResourceId)
+    )
 }
